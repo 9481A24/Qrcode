@@ -46,10 +46,11 @@
 <body>
   <h2>Gerar QR Code PIX - Orçamento Cliente</h2>
 
-  <input type="text" id="nome" placeholder="Nome do Cliente"><br>
+  <input type="text" id="nome" placeholder="Nome do Cliente" value="Marco Lúcio"><br>
   <input type="text" id="endereco" placeholder="Endereço"><br>
+  <textarea id="descricao" placeholder="Descrição do Serviço"></textarea><br>
   <input type="number" id="valor" placeholder="Valor do Serviço (R$)" step="0.01"><br>
-  <input type="text" id="chave" placeholder="Chave PIX (telefone, CPF ou e-mail)"><br>
+  <input type="text" id="chave" placeholder="Chave PIX (telefone, CPF ou e-mail)" value="04461680681"><br>
   <input type="text" id="numero" placeholder="Número WhatsApp do cliente (ex: 31999999999)"><br>
 
   <button onclick="gerarQRCode()">Gerar QR Code PIX</button>
@@ -64,12 +65,16 @@
     function gerarQRCode() {
       const nome = document.getElementById('nome').value;
       const endereco = document.getElementById('endereco').value;
+      const descricao = document.getElementById('descricao').value;
       const valor = document.getElementById('valor').value;
       const chave = document.getElementById('chave').value;
       const numero = document.getElementById('numero').value;
 
-      const mensagem = `💰 *Orçamento de Serviço*\n👤 Cliente: ${nome}\n🏠 Endereço: ${endereco}\n💵 Valor: R$${valor}\n🔑 Chave Pix: ${chave}`;
-      const pixPayload = `PIX: ${chave}\nNome: ${nome}\nValor: R$${valor}\nEndereço: ${endereco}`;
+      const nomeRecebedor = "Marco Lúcio";
+      const banco = "Neon";
+
+      const mensagem = `💰 *Orçamento de Serviço*\n👤 Cliente: ${nome}\n🏠 Endereço: ${endereco}\n🧱 Serviço: ${descricao}\n💵 Valor: R$${valor}\n🔑 Chave PIX: ${chave}\n🏦 Banco: ${banco}\n🧑 Recebedor: ${nomeRecebedor}`;
+      const pixPayload = `PIX: ${chave}\nNome: ${nomeRecebedor}\nBanco: ${banco}\nServiço: ${descricao}\nValor: R$${valor}\nEndereço: ${endereco}`;
 
       // Gera QR Code
       const qrDiv = document.getElementById('qrcode');
