@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento PIX</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+      text-align: center;
+    }
+    input, textarea {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #25D366;
+      color: white;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    #qrcode {
+      margin-top: 20px;
+    }
+    .copy-area {
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Gerar QR Code PIX - Orçamento Cliente</h2>
+
+  <input type="text" id="nome" placeholder="Nome do Cliente"><br>
+  <input type="text" id="endereco" placeholder="Endereço"><br>
+  <input type="number" id="valor" placeholder="Valor do Serviço (R$)" step="0.01"><br>
+  <input type="text" id="chave" placeholder="Chave PIX (telefone, CPF ou e-mail)"><br>
+  <input type="text" id="numero" placeholder="Número WhatsApp do cliente (ex: 31999999999)"><br>
+
+  <button onclick="gerarQRCode()">Gerar QR Code PIX</button>
+
+  <div id="qrcode"></div>
+  <div id="pixText" class="copy-area" style="display:none;"></div>
+  
+  <button id="copiarPix" style="display:none; background-color:#007bff;" onclick="copiarChavePix()">Copiar Chave PIX</button>
+  <button id="whatsappButton" style="display:none;" onclick="enviarWhatsApp()">Enviar no WhatsApp</button>
+
+  <script>
+    function gerarQRCode() {
+      const nome = document.getElementById('nome').value;
+      const endereco = document.getElementById('endereco').value;
+      const valor = document.getElementById('valor').value;
+      const chave = document.getElementById('chave').value;
+      const numero = document.getElementById('numero').value;
+
+      const mensagem = `💰 *Orçamento de Serviço*\n👤 Cliente: ${nome}\n🏠 Endereço: ${endereco}\n💵 Valor: R$${valor}\n🔑 Chave Pix: ${chave}`;
+      const pixPayload = `PIX: ${chave}\nNome: ${nome}\nValor: R$${valor}\nEndereço: ${endereco}`;
+
+      // Gera QR Code
+      const qrDiv = document.getElementById('qrcode');
+      qrDiv.innerHTML = "";
+      QRCode.toCanvas(pixPayload, { width: 200 }, function (err, canvas) {
+        if (err) console.error(err);
+        qrDiv.appendChild(canvas);
+      });
+
+      // Exibe texto Pix
+      const pixTextDiv = document.getElementById('pixText');
+      pixTextDiv.style.display = "block";
+      pixTextDiv.textContent = pixPayload;
+
+      // Armazena dados para envio e cópia
+      window.mensagemWhats = mensagem;
+      window.numeroWhats = numero;
+      window.chavePix = chave;
+
+      // Mostra botões
+      document.getElementById('whatsappButton').style.display = "inline-block";
+      document.getElementById('copiarPix').style.display = "inline-block";
+    }
+
+    function enviarWhatsApp() {
+      if (!window.numeroWhats || !window.mensagemWhats) return alert("Preencha os dados e gere o QR Code primeiro.");
+      const url = `https://wa.me/${window.numeroWhats}?text=${encodeURIComponent(window.mensagemWhats)}`;
+      window.open(url, "_blank");
+    }
+
+    function copiarChavePix() {
+      if (!window.chavePix) return alert("Gere o QR Code primeiro.");
+      navigator.clipboard.writeText(window.chavePix);
+      alert("✅ Chave PIX copiada com sucesso!");
+    }
+  </script>
+</body>
+</html>
