@@ -1,239 +1,149 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orçamento PIX - Gênesis Azulejista</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(180deg, #f2f2f2 0%, #e8e8e8 100%);
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-      color: #222;
-    }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #111;
-      font-size: 22px;
-      margin-bottom: 20px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      transition: 0.3s;
-    }
-    input:focus, textarea:focus {
-      border-color: #25D366;
-      outline: none;
-      box-shadow: 0 0 6px #25D36655;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-    button {
-      width: 100%;
-      font-weight: 600;
-      font-size: 15px;
-      margin-top: 10px;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button#gerar { background-color: #25D366; color: white; }
-    button#gerar:hover { background-color: #1eb056; }
-    button#copiarPix { background-color: #007bff; color: white; }
-    button#copiarPix:hover { background-color: #0056b3; }
-    button#whatsappButton { background-color: #128C7E; color: white; }
-    button#whatsappButton:hover { background-color: #0b5c4a; }
-    button#gerarImagem { background-color: #ffb300; color: white; }
-    button#gerarImagem:hover { background-color: #e0a100; }
-    #qrcode { margin-top: 20px; }
-    .copy-area {
-      background: #f9f9f9;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-top: 15px;
-      font-size: 14px;
-      text-align: left;
-      word-wrap: break-word;
-    }
-    footer {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #555;
-    }
-    .logo {
-      font-weight: 700;
-      color: #25D366;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-    #cardImagem {
-      display: none;
-      background: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      margin-top: 20px;
-      text-align: center;
-    }
-    #cardImagem h3 {
-      margin-bottom: 10px;
-      color: #25D366;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Orçamento Profissional</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;margin:0;padding:20px;}
+  .container{max-width:800px;margin:auto;}
+  h1{text-align:center;color:#111827;}
+  .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.1);margin-bottom:20px;}
+  label{display:block;margin-top:10px;font-weight:bold;}
+  input,select,textarea{width:100%;padding:8px;margin-top:5px;border:1px solid #ccc;border-radius:8px;}
+  button{background:#007bff;color:#fff;border:none;padding:10px 12px;border-radius:8px;margin-top:15px;cursor:pointer;}
+  button:hover{background:#0056b3;}
+  .nota{background:#fff;padding:15px;border-radius:10px;margin-top:20px;}
+  .controle{background:#e8ffe8;padding:15px;border-radius:10px;}
+  .qr-area{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  #qrcode{background:#fff;padding:8px;border-radius:10px;}
+</style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">Gênesis Azulejista</div>
-    <h2>Orçamento PIX - Cliente</h2>
+    <h1>📋 Orçamento - Gênesis Azulejista</h1>
 
-    <input type="text" id="nome" placeholder="Nome do Cliente" value="Marco Lúcio">
-    <input type="text" id="endereco" placeholder="Endereço do Serviço">
-    <textarea id="descricao" placeholder="Descrição do Serviço (ex: Instalação de porcelanato lastra 60m²)"></textarea>
-    <input type="number" id="valor" placeholder="Valor do Serviço (R$)" step="0.01">
-    <input type="text" id="chave" placeholder="Chave PIX" value="04461680681">
-    <input type="text" id="numero" placeholder="WhatsApp do Cliente (ex: 31999999999)">
+    <div class="card">
+      <label>Nome do Cliente</label>
+      <input type="text" id="nome">
 
-    <button id="gerar" onclick="gerarQRCode()">Gerar QR Code PIX</button>
+      <label>Descrição do Serviço</label>
+      <textarea id="descricao" rows="3"></textarea>
 
-    <div id="qrcode"></div>
-    <div id="pixText" class="copy-area" style="display:none;"></div>
+      <label>Valor Total (R$)</label>
+      <input type="number" id="valor" step="0.01">
 
-    <button id="copiarPix" style="display:none;" onclick="copiarChavePix()">📋 Copiar Chave PIX</button>
-    <button id="gerarImagem" style="display:none;" onclick="gerarImagem()">📸 Gerar Imagem Profissional</button>
-    <button id="whatsappButton" style="display:none;" onclick="enviarWhatsApp()">💬 Enviar no WhatsApp</button>
+      <label>Valor Recebido / Sinal (R$)</label>
+      <input type="number" id="sinal" step="0.01">
+
+      <label>Como entrou</label>
+      <select id="forma">
+        <option value="PIX">PIX</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão de Crédito">Cartão de Crédito</option>
+      </select>
+
+      <label>Restante combinado para pagamento</label>
+      <input type="date" id="dataRestante">
+
+      <label>Data de Início</label>
+      <input type="date" id="inicio">
+
+      <label>Data de Término</label>
+      <input type="date" id="termino">
+
+      <label>Prestador (Nome)</label>
+      <input type="text" id="prestador">
+
+      <label>CPF do Prestador</label>
+      <input type="text" id="cpf" placeholder="000.000.000-00">
+
+      <label>Chave PIX</label>
+      <input type="text" id="chavePix" placeholder="Ex: 04461680681">
+
+      <div class="qr-area">
+        <div id="qrcode"></div>
+        <button onclick="gerarQR()">Gerar QR PIX</button>
+      </div>
+
+      <button onclick="gerarNota()">Gerar Nota e Salvar</button>
+    </div>
+
+    <div id="notaGerada" class="nota" style="display:none;"></div>
+
+    <div class="controle">
+      <h3>📊 Controle do Mês</h3>
+      <div id="listaControle"></div>
+      <strong>Total do Mês: R$ <span id="totalMes">0,00</span></strong>
+    </div>
   </div>
 
-  <footer>© 2025 Gênesis Azulejista - Profissional em porcelanato e lastras</footer>
+<script>
+let registros = JSON.parse(localStorage.getItem("orcamentos3")) || [];
 
-  <!-- Área que será transformada em imagem -->
-  <div id="cardImagem">
-    <h3>Orçamento de Serviço</h3>
-    <p id="cardInfo"></p>
-    <div id="cardQr"></div>
-  </div>
+function gerarQR(){
+  const chave = document.getElementById('chavePix').value;
+  const sinal = parseFloat(document.getElementById('sinal').value)||0;
+  if(!chave){alert("Informe a chave PIX!");return;}
+  const texto = `Pagamento para ${chave}\nValor: R$ ${sinal.toFixed(2)}`;
+  document.getElementById('qrcode').innerHTML="";
+  QRCode.toCanvas(texto,{width:150},function(err,canvas){
+    if(err){alert("Erro ao gerar QR.");return;}
+    document.getElementById('qrcode').appendChild(canvas);
+  });
+}
 
-  <script>
-    let dadosPix = {};
+function gerarNota(){
+  const nome=document.getElementById('nome').value;
+  const descricao=document.getElementById('descricao').value;
+  const valor=parseFloat(document.getElementById('valor').value)||0;
+  const sinal=parseFloat(document.getElementById('sinal').value)||0;
+  const forma=document.getElementById('forma').value;
+  const dataRestante=document.getElementById('dataRestante').value;
+  const inicio=document.getElementById('inicio').value;
+  const termino=document.getElementById('termino').value;
+  const prestador=document.getElementById('prestador').value;
+  const cpf=document.getElementById('cpf').value;
+  const chavePix=document.getElementById('chavePix').value;
 
-    function gerarQRCode() {
-      const nome = document.getElementById('nome').value.trim();
-      const endereco = document.getElementById('endereco').value.trim();
-      const descricao = document.getElementById('descricao').value.trim();
-      const valor = document.getElementById('valor').value.trim();
-      const chave = document.getElementById('chave').value.trim();
-      const numero = document.getElementById('numero').value.trim();
+  if(!nome || !valor){alert("Preencha nome e valor total!");return;}
 
-      if (!nome || !descricao || !valor || !chave) {
-        alert("Por favor, preencha todos os campos obrigatórios.");
-        return;
-      }
+  const notaHTML=`
+    <h2>Nota de Orçamento</h2>
+    <p><strong>Cliente:</strong> ${nome}</p>
+    <p><strong>Serviço:</strong> ${descricao}</p>
+    <p><strong>Valor Total:</strong> R$ ${valor.toFixed(2)}</p>
+    <p><strong>Valor Recebido:</strong> R$ ${sinal.toFixed(2)} (${forma})</p>
+    <p><strong>Restante combinado:</strong> ${dataRestante?new Date(dataRestante).toLocaleDateString('pt-BR'):"-"}</p>
+    <p><strong>Início:</strong> ${inicio} - <strong>Término:</strong> ${termino}</p>
+    <hr>
+    <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpf}</p>
+    ${forma==="PIX"?`<p><strong>Chave PIX:</strong> ${chavePix}</p>`:""}
+    <p style="text-align:center;">💼 Gênesis Azulejista - BH e Região</p>
+  `;
+  document.getElementById('notaGerada').innerHTML=notaHTML;
+  document.getElementById('notaGerada').style.display="block";
 
-      const nomeRecebedor = "Marco Lúcio";
-      const banco = "Neon";
+  const registro={nome,descricao,valor,sinal,forma,dataRestante,inicio,termino,prestador,cpf,chavePix,data:new Date().toLocaleDateString()};
+  registros.push(registro);
+  localStorage.setItem("orcamentos3",JSON.stringify(registros));
+  atualizarControle();
+}
 
-      const mensagem = 
-`💰 *Orçamento de Serviço*
-👤 Cliente: ${nome}
-🏠 Endereço: ${endereco}
-🧱 Serviço: ${descricao}
-💵 Valor: R$${valor}
-🔑 Chave PIX: ${chave}
-🧑 Recebedor: ${nomeRecebedor} - Banco ${banco}`;
+function atualizarControle(){
+  const lista=document.getElementById('listaControle');
+  lista.innerHTML="";
+  let total=0;
+  registros.forEach(r=>{
+    total+=r.valor;
+    lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
+  });
+  document.getElementById('totalMes').innerText=total.toFixed(2);
+}
 
-      const pixPayload = 
-`PIX: ${chave}
-Recebedor: ${nomeRecebedor} - Banco ${banco}
-Serviço: ${descricao}
-Valor: R$${valor}
-Endereço: ${endereco}`;
-
-      // Exibir QR
-      const qrDiv = document.getElementById('qrcode');
-      qrDiv.innerHTML = "";
-      QRCode.toCanvas(pixPayload, { width: 220 }, function (err, canvas) {
-        if (err) console.error(err);
-        qrDiv.appendChild(canvas);
-      });
-
-      document.getElementById('pixText').style.display = "block";
-      document.getElementById('pixText').textContent = pixPayload;
-
-      // Guardar dados
-      dadosPix = { nome, endereco, descricao, valor, chave, nomeRecebedor, banco };
-      window.mensagemWhats = mensagem;
-      window.numeroWhats = numero;
-      window.chavePix = chave;
-
-      document.getElementById('copiarPix').style.display = "block";
-      document.getElementById('gerarImagem').style.display = "block";
-      document.getElementById('whatsappButton').style.display = "block";
-    }
-
-    function copiarChavePix() {
-      if (!window.chavePix) return alert("Gere o QR Code primeiro.");
-      navigator.clipboard.writeText(window.chavePix);
-      alert("✅ Chave PIX copiada com sucesso!");
-    }
-
-    function gerarImagem() {
-      const card = document.getElementById('cardImagem');
-      const info = document.getElementById('cardInfo');
-      const qr = document.getElementById('cardQr');
-      info.innerHTML = `
-        <strong>Cliente:</strong> ${dadosPix.nome}<br>
-        <strong>Serviço:</strong> ${dadosPix.descricao}<br>
-        <strong>Endereço:</strong> ${dadosPix.endereco}<br>
-        <strong>Valor:</strong> R$${dadosPix.valor}<br>
-        <strong>Chave PIX:</strong> ${dadosPix.chave}<br>
-        <strong>Recebedor:</strong> ${dadosPix.nomeRecebedor} - Banco ${dadosPix.banco}
-      `;
-      qr.innerHTML = "";
-      QRCode.toCanvas(`PIX: ${dadosPix.chave} - R$${dadosPix.valor}`, { width: 150 }, (err, canvas) => {
-        if (!err) qr.appendChild(canvas);
-      });
-
-      card.style.display = "block";
-      setTimeout(() => {
-        html2canvas(card).then(canvas => {
-          const link = document.createElement("a");
-          link.download = "orcamento-pix-genesis.png";
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-          alert("📸 Imagem profissional gerada com sucesso! Agora envie pelo WhatsApp.");
-        });
-      }, 500);
-    }
-
-    function enviarWhatsApp() {
-      if (!window.numeroWhats || !window.mensagemWhats) {
-        alert("Preencha os dados e gere o QR Code primeiro.");
-        return;
-      }
-      const url = `https://wa.me/${window.numeroWhats}?text=${encodeURIComponent(window.mensagemWhats)}`;
-      window.open(url, "_blank");
-    }
-  </script>
+atualizarControle();
+</script>
 </body>
 </html>
+
