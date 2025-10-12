@@ -15,9 +15,15 @@
   button{background:#007bff;color:#fff;border:none;padding:10px 12px;border-radius:8px;margin-top:15px;cursor:pointer;}
   button:hover{background:#0056b3;}
   .nota{background:#fff;padding:15px;border-radius:10px;margin-top:20px;}
-  .controle{background:#e8ffe8;padding:15px;border-radius:10px;}
-  .qr-area{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .controle{background:#e8ffe8;padding:15px;border-radius:10px;margin-top:20px;}
+  .qr-area{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;}
   #qrcode{background:#fff;padding:8px;border-radius:10px;}
+  .total-box{background:#c9f7c5;padding:10px;border-radius:10px;margin-top:10px;text-align:center;font-size:18px;font-weight:bold;}
+  .limpar{background:#dc3545;margin-left:10px;}
+  .limpar:hover{background:#a71d2a;}
+  .copy-msg{color:green;font-weight:bold;margin-left:5px;}
+  .whatsapp{background:#25d366;}
+  .whatsapp:hover{background:#1da851;}
 </style>
 </head>
 <body>
@@ -54,20 +60,23 @@
       <input type="date" id="termino">
 
       <label>Prestador (Nome)</label>
-      <input type="text" id="prestador">
+      <input type="text" id="prestador" value="Gênesis Azulejista">
 
       <label>CPF do Prestador</label>
-      <input type="text" id="cpf" placeholder="000.000.000-00">
+      <input type="text" id="cpf" value="123.456.789-00">
 
       <label>Chave PIX</label>
-      <input type="text" id="chavePix" placeholder="Ex: 04461680681">
+      <input type="text" id="chavePix" value="04461680681">
 
       <div class="qr-area">
         <div id="qrcode"></div>
         <button onclick="gerarQR()">Gerar QR PIX</button>
+        <button onclick="copiarChave()">📋 Copiar Chave PIX</button>
+        <span id="copyMsg" class="copy-msg" style="display:none;">✅ Copiada!</span>
       </div>
 
       <button onclick="gerarNota()">Gerar Nota e Salvar</button>
+      <button class="limpar" onclick="limparCampos()">🔄 Limpar e iniciar outro</button>
     </div>
 
     <div id="notaGerada" class="nota" style="display:none;"></div>
@@ -75,7 +84,10 @@
     <div class="controle">
       <h3>📊 Controle do Mês</h3>
       <div id="listaControle"></div>
-      <strong>Total do Mês: R$ <span id="totalMes">0,00</span></strong>
+      <div class="total-box">
+        💰 Total do Mês: R$ <span id="totalMes">0,00</span>
+      </div>
+      <button class="limpar" onclick="limparControle()">🗑️ Limpar Controle</button>
     </div>
   </div>
 
@@ -91,6 +103,16 @@ function gerarQR(){
   QRCode.toCanvas(texto,{width:150},function(err,canvas){
     if(err){alert("Erro ao gerar QR.");return;}
     document.getElementById('qrcode').appendChild(canvas);
+  });
+}
+
+function copiarChave(){
+  const chave = document.getElementById('chavePix').value;
+  if(!chave){alert("Nenhuma chave PIX informada.");return;}
+  navigator.clipboard.writeText(chave).then(()=>{
+    const msg=document.getElementById("copyMsg");
+    msg.style.display="inline";
+    setTimeout(()=>msg.style.display="none",2000);
   });
 }
 
@@ -121,6 +143,7 @@ function gerarNota(){
     <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpf}</p>
     ${forma==="PIX"?`<p><strong>Chave PIX:</strong> ${chavePix}</p>`:""}
     <p style="text-align:center;">💼 Gênesis Azulejista - BH e Região</p>
+    <button class="whatsapp" onclick="enviarWhatsApp('${nome}','${descricao}','${valor}','${sinal}','${forma}','${chavePix}')">📲 Enviar via WhatsApp</button>
   `;
   document.getElementById('notaGerada').innerHTML=notaHTML;
   document.getElementById('notaGerada').style.display="block";
@@ -129,6 +152,12 @@ function gerarNota(){
   registros.push(registro);
   localStorage.setItem("orcamentos3",JSON.stringify(registros));
   atualizarControle();
+}
+
+function enviarWhatsApp(nome,descricao,valor,sinal,forma,chavePix){
+  const msg = `📋 *Orçamento - Gênesis Azulejista*\n\n👤 Cliente: ${nome}\n🧱 Serviço: ${descricao}\n💰 Valor Total: R$ ${valor}\n💵 Sinal Recebido: R$ ${sinal} (${forma})\n\n🔑 Chave PIX: ${chavePix}\n\n📅 Obrigado por confiar em nosso trabalho!`;
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 function atualizarControle(){
@@ -142,8 +171,21 @@ function atualizarControle(){
   document.getElementById('totalMes').innerText=total.toFixed(2);
 }
 
+function limparCampos(){
+  document.querySelectorAll("input:not([id='prestador']):not([id='cpf']):not([id='chavePix']), textarea").forEach(el=>el.value="");
+  document.getElementById("notaGerada").style.display="none";
+  document.getElementById("qrcode").innerHTML="";
+}
+
+function limparControle(){
+  if(confirm("Tem certeza que deseja limpar todo o controle do mês?")){
+    registros=[];
+    localStorage.removeItem("orcamentos3");
+    atualizarControle();
+  }
+}
+
 atualizarControle();
 </script>
 </body>
 </html>
-
