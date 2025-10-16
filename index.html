@@ -3,313 +3,629 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Orçamento Profissional</title>
+<title>Gênesis Azulejista — Orçamentos</title>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;margin:0;padding:20px;}
-  .container{max-width:800px;margin:auto;}
-  h1{text-align:center;color:#111827;}
-  .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,0.1);margin-bottom:20px;}
-  label{display:block;margin-top:10px;font-weight:bold;}
-  input,select,textarea{width:100%;padding:8px;margin-top:5px;border:1px solid #ccc;border-radius:8px;}
-  button{background:#007bff;color:#fff;border:none;padding:10px 12px;border-radius:8px;margin-top:15px;cursor:pointer;}
-  button:hover{background:#0056b3;}
-  .nota{background:#fff;padding:15px;border-radius:10px;margin-top:20px;}
-  .controle{background:#e8ffe8;padding:15px;border-radius:10px;margin-top:20px;}
-  .qr-area{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;}
-  #qrcode{background:#fff;padding:8px;border-radius:10px;}
-  .total-box{background:#c9f7c5;padding:10px;border-radius:10px;margin-top:10px;text-align:center;font-size:18px;font-weight:bold;}
-  .limpar{background:#dc3545;margin-left:10px;}
-  .limpar:hover{background:#a71d2a;}
-  .copy-msg{color:green;font-weight:bold;margin-left:5px;}
-  .whatsapp{background:#25d366;}
-  .whatsapp:hover{background:#1da851;}
-  .btn-group button { margin-right: 10px; }
+  :root{
+    --bg:#f4f6f8;
+    --card:#ffffff;
+    --accent:#ffbf00;
+    --primary:#111827;
+    --muted:#6b7280;
+    --success:#25d366;
+    --danger:#dc3545;
+    --btn:#007bff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background:var(--bg);
+    color:var(--primary);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Top menu */
+  header{
+    background:linear-gradient(90deg,#0f172a 0%, #111827 60%);
+    color:#fff;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .logo {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:default;
+  }
+  .logo .mark{
+    width:46px;height:46px;border-radius:8px;
+    background:linear-gradient(135deg,#ffcc00,#ff9a00);
+    display:flex;align-items:center;justify-content:center;
+    color:#111;font-weight:800;font-size:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  }
+  .logo .title{
+    font-weight:700;font-size:18px;line-height:1;
+  }
+  nav{
+    margin-left:auto; display:flex; gap:10px;
+  }
+  nav button{
+    background:transparent;border:0;color:#fff;padding:8px 12px;border-radius:8px;
+    cursor:pointer;font-weight:600;
+  }
+  nav button:hover{background:rgba(255,255,255,0.06)}
+
+  /* main */
+  .wrap{max-width:980px;margin:22px auto;padding:0 16px}
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 6px 18px rgba(12,12,20,0.06);
+    margin-bottom:18px;
+  }
+
+  h2{margin:0 0 12px 0;font-size:20px}
+  label{display:block;margin-top:10px;font-weight:600;color:var(--muted);font-size:13px}
+  input, select, textarea {
+    width:100%; padding:10px;border-radius:8px;border:1px solid #e6e9ee;
+    margin-top:6px;font-size:15px;color:var(--primary);
+  }
+  textarea { min-height:84px; resize:vertical; }
+
+  .row{display:flex;gap:12px}
+  .col{flex:1}
+  .col-2{flex:0 0 160px}
+  .small{font-size:13px;color:var(--muted);margin-top:6px}
+
+  /* buttons group */
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .btn{
+    padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;
+    background:var(--btn);color:#fff;
+  }
+  .btn.secondary{background:#6b7280}
+  .btn.success{background:var(--success);color:#06372b}
+  .btn.danger{background:var(--danger)}
+  .btn.ghost{background:transparent;color:var(--primary);border:1px solid #e6e9ee}
+  .btn.small{padding:8px 10px;font-size:14px}
+
+  /* area nota gerada */
+  .nota-wrapper{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .nota{
+    flex:1;
+    min-width:320px;
+    background:linear-gradient(180deg,#fff,#fbfbfb);
+    border-radius:10px;padding:18px;border:1px solid #eef2f7;
+  }
+  .nota header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .nota .logo-mini{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#ffcc00,#ff9a00);
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#111}
+  .nota h3{margin:0}
+  .nota p{margin:6px 0;color:#222}
+  .nota .line{border-top:1px dashed #e6e9ee;margin:12px 0}
+
+  .nota .meta{display:flex;gap:12px;flex-wrap:wrap}
+  .nota .meta div{flex:1;min-width:140px}
+
+  .qrcode-box{width:180px;padding:14px;border-radius:8px;border:1px solid #eef2f7;background:#fff;text-align:center}
+  .qrcode-canvas{display:block;margin:0 auto}
+
+  /* saved notes */
+  .list-note{border-radius:8px;padding:10px;border:1px solid #eef2f7;margin-bottom:10px;background:#fff}
+  .list-note .head{display:flex;justify-content:space-between;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+
+  /* responsive */
+  @media (max-width:720px){
+    .row{flex-direction:column}
+    nav{display:none}
+  }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📋 Orçamento - Betim Azulejista</h1>
-
-    <div class="card">
-      <label>Nome do Cliente</label>
-      <input type="text" id="nome">
-
-      <label>CPF do Cliente</label>
-      <input type="text" id="cpfCliente" maxlength="14" placeholder="000.000.000-00">
-
-      <label>Endereço</label>
-      <input type="text" id="endereco">
-
-      <label>Número</label>
-      <input type="text" id="numero">
-
-      <label>Bairro</label>
-      <input type="text" id="bairro">
-
-      <label>Cidade</label>
-      <input type="text" id="cidade">
-
-      <label>Estado</label>
-      <input type="text" id="estado" value="MG" readonly>
-
-      <label>Descrição do Serviço</label>
-      <textarea id="descricao" rows="3"></textarea>
-
-      <label>Valor Total (R$)</label>
-      <input type="number" id="valor" step="0.01" oninput="atualizarRestante()">
-
-      <label>Valor Recebido / Sinal (R$)</label>
-      <input type="number" id="sinal" step="0.01" oninput="atualizarRestante()">
-
-      <label>Restante Valor (R$)</label>
-      <input type="number" id="restanteValor" readonly>
-
-      <label>Como entrou</label>
-      <select id="forma">
-        <option value="PIX">PIX</option>
-        <option value="Dinheiro">Dinheiro</option>
-        <option value="Cartão de Crédito">Cartão de Crédito</option>
-      </select>
-
-      <label>Restante combinado para pagamento</label>
-      <input type="date" id="dataRestante">
-
-      <label>Data de Início</label>
-      <input type="date" id="inicio">
-
-      <label>Data de Término</label>
-      <input type="date" id="termino">
-
-      <label>Prestador (Nome)</label>
-      <input type="text" id="prestador" value="Gênesis Azulejista">
-
-      <label>CPF do Prestador</label>
-      <input type="text" id="cpf" value="123.456.789-00">
-
-      <label>Chave PIX</label>
-      <input type="text" id="chavePix" value="04461680681">
-
-      <div class="qr-area">
-        <div id="qrcode"></div>
-        <button onclick="gerarQR()">Gerar QR PIX</button>
-        <button onclick="copiarChave()">📋 Copiar Chave PIX</button>
-        <span id="copyMsg" class="copy-msg" style="display:none;">✅ Copiada!</span>
-      </div>
-
-      <div class="btn-group">
-        <button onclick="gerarNota()">Gerar Nota e Salvar</button>
-        <button onclick="imprimirNota()">🖨️ Imprimir Nota</button>
-        <button onclick="enviarWhatsApp()">📲 Enviar via WhatsApp</button>
-        <button class="limpar" onclick="limparCampos()">🔄 Limpar e iniciar outro</button>
-        <button onclick="preencherRapido()">⚡ Preencher rápido</button>
-      </div>
+  <header>
+    <div class="logo">
+      <div class="mark">GZ</div>
+      <div class="title">Gênesis Azulejista</div>
     </div>
 
-    <div id="notaGerada" class="nota" style="display:none;"></div>
+    <nav>
+      <button onclick="show('form')">➕ Novo Orçamento</button>
+      <button onclick="show('saved')">📚 Notas Salvas</button>
+      <button onclick="show('about')">ℹ️ Sobre</button>
+    </nav>
+  </header>
 
-    <div class="controle">
-      <h3>📊 Controle do Mês</h3>
-      <div id="listaControle"></div>
-      <div class="total-box">
-        💰 Total do Mês: R$ <span id="totalMes">0,00</span>
+  <main class="wrap">
+    <!-- FORM -->
+    <section id="form" class="card">
+      <h2>Preencher Orçamento</h2>
+
+      <div class="row">
+        <div class="col">
+          <label>Data do Orçamento</label>
+          <input type="date" id="dataOrc" />
+
+          <label>Cliente (Nome)</label>
+          <input id="cliente" placeholder="Nome do cliente">
+
+          <label>Descrição do Serviço</label>
+          <textarea id="descricao" placeholder="Ex: Revestimento de banheiro, assentamento porcelanato..."></textarea>
+
+          <div class="row">
+            <div class="col">
+              <label>Valor Total (R$)</label>
+              <input type="number" id="valor" step="0.01" min="0" />
+            </div>
+            <div class="col">
+              <label>Sinal (R$)</label>
+              <input type="number" id="sinal" step="0.01" min="0" />
+            </div>
+            <div class="col">
+              <label>Restante (R$)</label>
+              <input type="number" id="restante" step="0.01" min="0" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label>Data Início</label>
+              <input type="date" id="inicio" />
+            </div>
+            <div class="col">
+              <label>Data Término</label>
+              <input type="date" id="termino" />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col col-2">
+          <label>Endereço — Rua</label>
+          <input id="rua" placeholder="Rua">
+
+          <label>Número</label>
+          <input id="numero" placeholder="123">
+
+          <label>Bairro</label>
+          <input id="bairro" placeholder="Bairro">
+
+          <label>Cidade</label>
+          <input id="cidade" placeholder="Cidade">
+
+          <label>Estado</label>
+          <input id="estado" placeholder="MG" value="MG">
+
+          <label>Forma de Pagamento</label>
+          <select id="forma">
+            <option>PIX</option>
+            <option>Dinheiro</option>
+            <option>Cartão de Crédito</option>
+            <option>Cartão de Débito</option>
+          </select>
+
+          <label>Prestador (Nome)</label>
+          <input id="prestador" value="Gênesis Azulejista">
+
+          <label>CPF do Prestador</label>
+          <input id="cpfPrestador" value="123.456.789-00">
+
+          <label>Chave PIX (padrão)</label>
+          <input id="chavePix" value="04461680681">
+        </div>
       </div>
-      <button class="limpar" onclick="limparControle()">🗑️ Limpar Controle</button>
-    </div>
-  </div>
+
+      <div class="actions">
+        <button class="btn" onclick="quickFill()">⚡ Preencher rápido</button>
+        <button class="btn" onclick="computeRest()">🔢 Calcular restante</button>
+        <button class="btn" onclick="generateNote()">🧾 Gerar Nota</button>
+        <button class="btn secondary" onclick="resetForm()">♻️ Limpar</button>
+        <button class="btn ghost" onclick="saveNote()">💾 Salvar Nota</button>
+      </div>
+      <div class="small" style="margin-top:10px">Dica: clique "Calcular restante" para atualizar automaticamente a diferença entre total e sinal.</div>
+    </section>
+
+    <!-- NOTA GERADA -->
+    <section id="nota" class="card" style="display:none;">
+      <div class="nota-wrapper">
+        <div class="nota" id="notaVisual">
+          <header>
+            <div class="logo-mini">GZ</div>
+            <div>
+              <h3>Gênesis Azulejista</h3>
+              <div class="muted">Especialista em porcelanato lastra — BH e Região</div>
+            </div>
+          </header>
+
+          <div style="margin-top:8px">
+            <p><strong>Data:</strong> <span id="vData"></span></p>
+            <p><strong>Cliente:</strong> <span id="vCliente"></span></p>
+            <p><strong>Serviço:</strong> <span id="vDescricao"></span></p>
+
+            <div class="line"></div>
+
+            <div class="meta">
+              <div><strong>Valor Total:</strong><div>R$ <span id="vValor"></span></div></div>
+              <div><strong>Sinal:</strong><div>R$ <span id="vSinal"></span></div></div>
+              <div><strong>Restante:</strong><div>R$ <span id="vRestante"></span></div></div>
+            </div>
+
+            <div class="line"></div>
+
+            <p><strong>Período:</strong> <span id="vInicio"></span> — <span id="vTermino"></span></p>
+            <p><strong>Endereço:</strong> <span id="vRua"></span>, <span id="vNumero"></span> — <span id="vBairro"></span> / <span id="vCidade"></span> - <span id="vEstado"></span></p>
+            <p><strong>Forma de Pagamento:</strong> <span id="vForma"></span></p>
+
+            <div class="line"></div>
+
+            <p><strong>Prestador:</strong> <span id="vPrestador"></span> — CPF: <span id="vCpfPrestador"></span></p>
+            <p><strong>Chave PIX:</strong> <span id="vChavePix"></span></p>
+
+            <p class="muted" style="margin-top:12px;text-align:center;font-size:13px">Obrigado por confiar no nosso trabalho — contato: (32) 99543-9612 • Instagram: @genesisazulejista</p>
+          </div>
+        </div>
+
+        <div style="width:220px">
+          <div class="qrcode-box card" id="qrcodeArea">
+            <div style="font-weight:700;margin-bottom:8px">QR PIX</div>
+            <canvas id="qrCanvas" class="qrcode-canvas"></canvas>
+            <div class="small muted" style="margin-top:8px">Toque em "Gerar QR" para atualizar o código.</div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+            <button class="btn success" onclick="generateQR()">🔳 Gerar QR</button>
+            <button class="btn" onclick="printNote()">🖨️ Imprimir Nota</button>
+            <button class="btn" onclick="sendWhats()">📲 Enviar via WhatsApp</button>
+            <button class="btn secondary" onclick="show('form')">✏️ Editar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTAS SALVAS -->
+    <section id="saved" class="card" style="display:none">
+      <h2>Notas Salvas</h2>
+      <div id="savedList" style="margin-top:12px"></div>
+      <div style="margin-top:8px">
+        <button class="btn danger" onclick="clearSaved()">🗑️ Limpar todas as notas salvas</button>
+      </div>
+    </section>
+
+    <!-- SOBRE -->
+    <section id="about" class="card" style="display:none">
+      <h2>Sobre</h2>
+      <p>Este sistema gera notas rápidas com QR Code PIX, impressão e envio por WhatsApp. As notas podem ser salvas localmente no navegador (Notas Salvas).</p>
+      <p><strong>Gênesis Azulejista</strong> — atendimento em BH e região • contato: (32) 99543-9612</p>
+    </section>
+  </main>
 
 <script>
-let registros = JSON.parse(localStorage.getItem("orcamentos3")) || [];
+  // --- Estado e utilitários ---
+  const STORAGE_KEY = "genesis_notas_v1";
+  let currentNote = null;
 
-function atualizarRestante(){
-  const valor = parseFloat(document.getElementById('valor').value) || 0;
-  const sinal = parseFloat(document.getElementById('sinal').value) || 0;
-  const restante = valor - sinal;
-  document.getElementById('restanteValor').value = restante > 0 ? restante.toFixed(2) : "0.00";
-}
-
-function gerarQR(){
-  const chave = document.getElementById('chavePix').value;
-  const sinal = parseFloat(document.getElementById('sinal').value)||0;
-  if(!chave){alert("Informe a chave PIX!");return;}
-  const texto = `Pagamento para ${chave}\nValor: R$ ${sinal.toFixed(2)}`;
-  document.getElementById('qrcode').innerHTML="";
-  QRCode.toCanvas(texto,{width:150},function(err,canvas){
-    if(err){alert("Erro ao gerar QR.");return;}
-    document.getElementById('qrcode').appendChild(canvas);
-  });
-}
-
-function copiarChave(){
-  const chave = document.getElementById('chavePix').value;
-  if(!chave){alert("Nenhuma chave PIX informada.");return;}
-  navigator.clipboard.writeText(chave).then(()=>{
-    const msg=document.getElementById("copyMsg");
-    msg.style.display="inline";
-    setTimeout(()=>msg.style.display="none",2000);
-  });
-}
-
-function gerarNota(){
-  const nome=document.getElementById('nome').value.trim();
-  const cpfCliente=document.getElementById('cpfCliente').value.trim();
-  const endereco=document.getElementById('endereco').value.trim();
-  const numero=document.getElementById('numero').value.trim();
-  const bairro=document.getElementById('bairro').value.trim();
-  const cidade=document.getElementById('cidade').value.trim();
-  const estado=document.getElementById('estado').value.trim();
-
-  const descricao=document.getElementById('descricao').value.trim();
-  const valor=parseFloat(document.getElementById('valor').value)||0;
-  const sinal=parseFloat(document.getElementById('sinal').value)||0;
-  const restante = valor - sinal;
-  const forma=document.getElementById('forma').value;
-  const dataRestante=document.getElementById('dataRestante').value;
-  const inicio=document.getElementById('inicio').value;
-  const termino=document.getElementById('termino').value;
-  const prestador=document.getElementById('prestador').value;
-  const cpfPrestador=document.getElementById('cpf').value;
-  const chavePix=document.getElementById('chavePix').value;
-
-  if(!nome || !cpfCliente || !endereco || !numero || !bairro || !cidade || !valor){
-    alert("Por favor, preencha todos os dados obrigatórios antes de gerar a nota!");
-    return;
+  function show(id){
+    document.getElementById('form').style.display = (id==='form') ? 'block' : 'none';
+    document.getElementById('nota').style.display = (id==='nota') ? 'block' : 'none';
+    document.getElementById('saved').style.display = (id==='saved') ? 'block' : 'none';
+    document.getElementById('about').style.display = (id==='about') ? 'block' : 'none';
+    if(id==='saved') renderSaved();
   }
 
-  const enderecoCompleto = `${endereco}, ${numero} - ${bairro}, ${cidade} - ${estado}`;
+  // inicial
+  show('form');
 
-  const notaHTML=`
-    <h2>Nota de Orçamento</h2>
-    <p><strong>Cliente:</strong> ${nome}</p>
-    <p><strong>CPF:</strong> ${cpfCliente}</p>
-    <p><strong>Endereço:</strong> ${enderecoCompleto}</p>
-    <p><strong>Serviço:</strong> ${descricao}</p>
-    <p><strong>Valor Total:</strong> R$ ${valor.toFixed(2)}</p>
-    <p><strong>Valor Recebido:</strong> R$ ${sinal.toFixed(2)} (${forma})</p>
-    <p><strong>Restante a pagar:</strong> R$ ${restante > 0 ? restante.toFixed(2) : "0.00"}</p>
-    <p><strong>Restante combinado para pagamento:</strong> ${dataRestante ? new Date(dataRestante).toLocaleDateString('pt-BR') : "-"}</p>
-    <p><strong>Início:</strong> ${inicio ? new Date(inicio).toLocaleDateString('pt-BR') : "-"} - <strong>Término:</strong> ${termino ? new Date(termino).toLocaleDateString('pt-BR') : "-"}</p>
-    <hr>
-    <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpfPrestador}</p>
-    ${forma==="PIX" ? `<p><strong>Chave PIX:</strong> ${chavePix}</p>` : ""}
-    <p style="text-align:center;">💼 Gênesis Azulejista - BH e Região</p>
-  `;
-  document.getElementById('notaGerada').innerHTML=notaHTML;
-  document.getElementById('notaGerada').style.display="block";
-
-  const registro={nome,cpfCliente,enderecoCompleto,descricao,valor,sinal,restante,forma,dataRestante,inicio,termino,prestador,cpfPrestador,chavePix,data:new Date().toLocaleDateString()};
-  registros.push(registro);
-  localStorage.setItem("orcamentos3",JSON.stringify(registros));
-  atualizarControle();
-}
-
-function enviarWhatsApp(){
-  const nome=document.getElementById('nome').value.trim();
-  const cpfCliente=document.getElementById('cpfCliente').value.trim();
-  const endereco=document.getElementById('endereco').value.trim();
-  const numero=document.getElementById('numero').value.trim();
-  const bairro=document.getElementById('bairro').value.trim();
-  const cidade=document.getElementById('cidade').value.trim();
-  const estado=document.getElementById('estado').value.trim();
-
-  const descricao=document.getElementById('descricao').value.trim();
-  const valor=parseFloat(document.getElementById('valor').value)||0;
-  const sinal=parseFloat(document.getElementById('sinal').value)||0;
-  const restante = valor - sinal;
-  const forma=document.getElementById('forma').value;
-  const chavePix=document.getElementById('chavePix').value;
-
-  if(!nome || !cpfCliente || !endereco || !numero || !bairro || !cidade || !valor){
-    alert("Por favor, gere a nota corretamente antes de enviar pelo WhatsApp.");
-    return;
+  // --- Form helpers ---
+  function quickFill(){
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('dataOrc').value = hoje;
+    document.getElementById('cliente').value = "João Silva";
+    document.getElementById('descricao').value = "Revestimento de banheiro (porcelanato lastra)";
+    document.getElementById('valor').value = "1500.00";
+    document.getElementById('sinal').value = "500.00";
+    computeRest();
+    document.getElementById('inicio').value = hoje;
+    document.getElementById('termino').value = hoje;
+    document.getElementById('rua').value = "Rua das Flores";
+    document.getElementById('numero').value = "123";
+    document.getElementById('bairro').value = "Centro";
+    document.getElementById('cidade').value = "Betim";
+    document.getElementById('estado').value = "MG";
+    document.getElementById('prestador').value = "Gênesis Azulejista";
+    document.getElementById('cpfPrestador').value = "123.456.789-00";
+    document.getElementById('chavePix').value = "04461680681";
   }
 
-  const enderecoCompleto = `${endereco}, ${numero} - ${bairro}, ${cidade} - ${estado}`;
+  function computeRest(){
+    const v = parseFloat(document.getElementById('valor').value) || 0;
+    const s = parseFloat(document.getElementById('sinal').value) || 0;
+    const rest = Math.max(0, v - s);
+    document.getElementById('restante').value = rest.toFixed(2);
+  }
 
-  const msg = `📋 *Orçamento - Gênesis Azulejista*\n\n` +
-              `👤 Cliente: ${nome}\n` +
-              `🆔 CPF: ${cpfCliente}\n` +
-              `🏠 Endereço: ${enderecoCompleto}\n` +
-              `🧱 Serviço: ${descricao}\n` +
-              `💰 Valor Total: R$ ${valor.toFixed(2)}\n` +
-              `💵 Sinal Recebido: R$ ${sinal.toFixed(2)} (${forma})\n` +
-              `💸 Restante a pagar: R$ ${restante > 0 ? restante.toFixed(2) : "0.00"}\n` +
-              (forma==="PIX" ? `🔑 Chave PIX: ${chavePix}\n` : "") +
-              `\n📅 Obrigado por confiar em nosso trabalho!`;
-
-  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
-
-function atualizarControle(){
-  const lista=document.getElementById('listaControle');
-  lista.innerHTML="";
-  let total=0;
-  registros.forEach(r=>{
-    total+=r.valor;
-    lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
-  });
-  document.getElementById('totalMes').innerText=total.toFixed(2).replace('.',',');
-}
-
-function limparCampos(){
-  if(confirm("Tem certeza que quer limpar todos os campos para um novo orçamento?")){
-    document.querySelectorAll('input,textarea,select').forEach(e=>{
-      if(e.id==="estado") return; // mantem MG
-      if(e.id==="prestador") return; // mantem nome prestador
-      if(e.id==="cpf") return; // mantem cpf prestador
-      if(e.id==="chavePix") return; // mantem chave pix
-      e.value="";
+  function resetForm(){
+    if(!confirm("Limpar todos os campos do formulário?")) return;
+    document.querySelectorAll('#form input, #form textarea, #form select').forEach(el=>{
+      if(el.id==='estado') return; // mantém padrão MG
+      if(el.id==='prestador') return; // mantém prestador padrão se quiser
+      el.value = '';
     });
-    document.getElementById('restanteValor').value="";
-    document.getElementById('notaGerada').style.display="none";
-    document.getElementById('qrcode').innerHTML="";
   }
-}
 
-function limparControle(){
-  if(confirm("Quer apagar todo o controle do mês?")){
-    registros=[];
-    localStorage.removeItem("orcamentos3");
-    atualizarControle();
+  // --- Gerar nota (visual) ---
+  function generateNote(){
+    computeRest();
+    const nota = collectForm();
+    if(!nota.cliente || !nota.descricao || !nota.valor){
+      alert("Preencha pelo menos: Cliente, Descrição e Valor.");
+      return;
+    }
+    currentNote = nota;
+    renderNote(nota);
+    show('nota');
   }
-}
 
-function imprimirNota(){
-  if(document.getElementById('notaGerada').style.display==="none"){
-    alert("Gere a nota antes de imprimir.");
-    return;
+  function collectForm(){
+    return {
+      data: document.getElementById('dataOrc').value || new Date().toISOString().split('T')[0],
+      cliente: document.getElementById('cliente').value.trim(),
+      descricao: document.getElementById('descricao').value.trim(),
+      valor: parseFloat(document.getElementById('valor').value || 0).toFixed(2),
+      sinal: parseFloat(document.getElementById('sinal').value || 0).toFixed(2),
+      restante: parseFloat(document.getElementById('restante').value || 0).toFixed(2),
+      inicio: document.getElementById('inicio').value || '-',
+      termino: document.getElementById('termino').value || '-',
+      rua: document.getElementById('rua').value || '-',
+      numero: document.getElementById('numero').value || '-',
+      bairro: document.getElementById('bairro').value || '-',
+      cidade: document.getElementById('cidade').value || '-',
+      estado: document.getElementById('estado').value || 'MG',
+      forma: document.getElementById('forma').value,
+      prestador: document.getElementById('prestador').value,
+      cpfPrestador: document.getElementById('cpfPrestador').value,
+      chavePix: document.getElementById('chavePix').value || '04461680681',
+      createdAt: new Date().toISOString()
+    };
   }
-  const conteudo = document.getElementById('notaGerada').innerHTML;
-  const win = window.open('','','width=600,height=700');
-  win.document.write(`<html><head><title>Nota de Orçamento</title></head><body>${conteudo}</body></html>`);
-  win.document.close();
-  win.focus();
-  win.print();
-  win.close();
-}
 
-function preencherRapido(){
-  document.getElementById('nome').value = "João Silva";
-  document.getElementById('cpfCliente').value = "123.456.789-00";
-  document.getElementById('endereco').value = "Rua das Flores";
-  document.getElementById('numero').value = "123";
-  document.getElementById('bairro').value = "Centro";
-  document.getElementById('cidade').value = "Betim";
-  document.getElementById('descricao').value = "Revestimento de banheiro";
-  document.getElementById('valor').value = "1500.00";
-  document.getElementById('sinal').value = "500.00";
-  atualizarRestante();
-  document.getElementById('forma').value = "PIX";
-  const hoje = new Date().toISOString().split('T')[0];
-  document.getElementById('dataRestante').value = hoje;
-  document.getElementById('inicio').value = hoje;
-  document.getElementById('termino').value = hoje;
-}
+  function renderNote(n){
+    document.getElementById('vData').innerText = formatDate(n.data);
+    document.getElementById('vCliente').innerText = n.cliente;
+    document.getElementById('vDescricao').innerText = n.descricao;
+    document.getElementById('vValor').innerText = Number(n.valor).toFixed(2).replace('.',',');
+    document.getElementById('vSinal').innerText = Number(n.sinal).toFixed(2).replace('.',',');
+    document.getElementById('vRestante').innerText = Number(n.restante).toFixed(2).replace('.',',');
+    document.getElementById('vInicio').innerText = n.inicio !== '-' ? formatDate(n.inicio) : '-';
+    document.getElementById('vTermino').innerText = n.termino !== '-' ? formatDate(n.termino) : '-';
+    document.getElementById('vRua').innerText = n.rua;
+    document.getElementById('vNumero').innerText = n.numero;
+    document.getElementById('vBairro').innerText = n.bairro;
+    document.getElementById('vCidade').innerText = n.cidade;
+    document.getElementById('vEstado').innerText = n.estado;
+    document.getElementById('vForma').innerText = n.forma;
+    document.getElementById('vPrestador').innerText = n.prestador;
+    document.getElementById('vCpfPrestador').innerText = n.cpfPrestador;
+    document.getElementById('vChavePix').innerText = n.chavePix;
 
-window.onload = function(){
-  atualizarControle();
-}
+    // limpa canvas qr se tiver
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  function formatDate(d){
+    if(!d) return '-';
+    const date = new Date(d);
+    if(isNaN(date)) {
+      // já é string yyyy-mm-dd
+      const parts = d.split('-');
+      return parts.length===3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d;
+    }
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  // --- QR Code ---
+  async function generateQR(){
+    if(!currentNote){
+      alert("Gere a nota primeiro.");
+      return;
+    }
+    const pix = buildPix(currentNote);
+    // gera QR no canvas
+    try {
+      await QRCode.toCanvas(document.getElementById('qrCanvas'), pix, { width: 180 });
+    } catch(e){
+      alert("Erro ao gerar QR: " + e);
+    }
+  }
+
+  // Simples string de demonstração — para pagamento real, usar padrão EMV ou gerador oficial
+  function buildPix(n){
+    // texto resumido com info útil para cliente copiar/ler
+    return `PIX: ${n.chavePix}\nValor: R$ ${Number(n.valor).toFixed(2)}\nFavorecido: ${n.prestador}\nDescrição: ${n.descricao}`;
+  }
+
+  // --- Impressão ---
+  function printNote(){
+    if(!currentNote){
+      alert("Gere a nota antes de imprimir.");
+      return;
+    }
+    // cria janela com layout limpo da nota
+    const notaHTML = document.getElementById('notaVisual').outerHTML;
+    const win = window.open('','_blank','width=800,height=900');
+    const style = document.querySelector('style').innerHTML;
+    win.document.write(`<html><head><title>Nota - ${currentNote.cliente}</title><style>${style} body{background:#fff;padding:20px}</style></head><body>${notaHTML}</body></html>`);
+    win.document.close();
+    setTimeout(()=>{ win.print(); }, 300);
+  }
+
+  // --- WhatsApp enviar ---
+  function sendWhats(){
+    if(!currentNote){
+      alert("Gere a nota antes de enviar.");
+      return;
+    }
+    const n = currentNote;
+    const mensagem =
+`🧾 *Orçamento - Gênesis Azulejista*
+Data: ${formatDate(n.data)}
+Cliente: ${n.cliente}
+Serviço: ${n.descricao}
+Valor Total: R$ ${Number(n.valor).toFixed(2)}
+Sinal: R$ ${Number(n.sinal).toFixed(2)}
+Restante: R$ ${Number(n.restante).toFixed(2)}
+Período: ${n.inicio} até ${n.termino}
+Endereço: ${n.rua}, ${n.numero} - ${n.bairro}, ${n.cidade} - ${n.estado}
+Forma: ${n.forma}
+PIX: ${n.chavePix}
+
+Obrigado por confiar no nosso trabalho!`;
+
+    // número padrão em branco (abre conversa) — o usuário pode escolher o contato no app
+    const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+    window.open(url,'_blank');
+  }
+
+  // --- Salvar notas ---
+  function loadSaved(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){
+      return [];
+    }
+  }
+  function saveAll(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function saveNote(){
+    const nota = collectForm();
+    if(!nota.cliente || !nota.descricao || !nota.valor){
+      alert("Preencha Cliente, Descrição e Valor antes de salvar.");
+      return;
+    }
+    const list = loadSaved();
+    list.unshift(nota); // salva no topo
+    saveAll(list);
+    alert("Nota salva localmente.");
+    renderSaved();
+  }
+
+  function renderSaved(){
+    const list = loadSaved();
+    const container = document.getElementById('savedList');
+    container.innerHTML = '';
+    if(list.length===0){
+      container.innerHTML = '<div class="muted">Sem notas salvas.</div>';
+      return;
+    }
+    list.forEach((n, idx)=>{
+      const div = document.createElement('div');
+      div.className = 'list-note';
+      div.innerHTML = `
+        <div class="head">
+          <div>
+            <strong>${n.cliente}</strong> <span class="muted">• ${formatDate(n.data)}</span>
+            <div class="muted" style="font-size:13px">${n.descricao}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700">R$ ${Number(n.valor).toFixed(2)}</div>
+            <div class="muted" style="font-size:13px">Restante R$ ${Number(n.restante).toFixed(2)}</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small" onclick="loadSavedIntoForm(${idx})">✏️ Abrir</button>
+          <button class="btn small ghost" onclick="previewSaved(${idx})">🔍 Visualizar</button>
+          <button class="btn small" onclick="sendSavedWh(${idx})">📲 Enviar Whats</button>
+          <button class="btn small secondary" onclick="printSaved(${idx})">🖨 Imprimir</button>
+          <button class="btn small danger" onclick="deleteSaved(${idx})">🗑️ Apagar</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function loadSavedIntoForm(index){
+    const list = loadSaved();
+    const n = list[index];
+    if(!n) return;
+    // preenche form com os dados
+    document.getElementById('dataOrc').value = n.data;
+    document.getElementById('cliente').value = n.cliente;
+    document.getElementById('descricao').value = n.descricao;
+    document.getElementById('valor').value = n.valor;
+    document.getElementById('sinal').value = n.sinal;
+    document.getElementById('restante').value = n.restante;
+    document.getElementById('inicio').value = n.inicio;
+    document.getElementById('termino').value = n.termino;
+    document.getElementById('rua').value = n.rua;
+    document.getElementById('numero').value = n.numero;
+    document.getElementById('bairro').value = n.bairro;
+    document.getElementById('cidade').value = n.cidade;
+    document.getElementById('estado').value = n.estado;
+    document.getElementById('forma').value = n.forma;
+    document.getElementById('prestador').value = n.prestador;
+    document.getElementById('cpfPrestador').value = n.cpfPrestador;
+    document.getElementById('chavePix').value = n.chavePix;
+    alert("Nota carregada no formulário. Clique em 'Gerar Nota' para visualizar.");
+    show('form');
+  }
+
+  function previewSaved(index){
+    const list = loadSaved();
+    const n = list[index];
+    if(!n) return;
+    currentNote = n;
+    renderNote(n);
+    show('nota');
+  }
+
+  function sendSavedWh(index){
+    const list = loadSaved();
+    const n = list[index];
+    if(!n) return;
+    currentNote = n;
+    sendWhats();
+  }
+
+  function printSaved(index){
+    const list = loadSaved();
+    const n = list[index];
+    if(!n) return;
+    currentNote = n;
+    renderNote(n);
+    printNote();
+  }
+
+  function deleteSaved(index){
+    if(!confirm("Apagar essa nota?")) return;
+    const list = loadSaved();
+    list.splice(index,1);
+    saveAll(list);
+    renderSaved();
+  }
+
+  function clearSaved(){
+    if(!confirm("Apagar todas as notas salvas?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    renderSaved();
+  }
+
+  // --- startup ---
+  window.addEventListener('load', ()=>{
+    renderSaved();
+  });
+
+  // Atalho: enter em campos numéricos calcula
+  document.getElementById('sinal').addEventListener('change', computeRest);
+  document.getElementById('valor').addEventListener('change', computeRest);
 </script>
 </body>
 </html>
