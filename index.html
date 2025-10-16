@@ -24,6 +24,7 @@
   .copy-msg{color:green;font-weight:bold;margin-left:5px;}
   .whatsapp{background:#25d366;}
   .whatsapp:hover{background:#1da851;}
+  .btn-group button { margin-right: 10px; }
 </style>
 </head>
 <body>
@@ -34,14 +35,35 @@
       <label>Nome do Cliente</label>
       <input type="text" id="nome">
 
+      <label>CPF do Cliente</label>
+      <input type="text" id="cpfCliente" maxlength="14" placeholder="000.000.000-00">
+
+      <label>Endereço</label>
+      <input type="text" id="endereco">
+
+      <label>Número</label>
+      <input type="text" id="numero">
+
+      <label>Bairro</label>
+      <input type="text" id="bairro">
+
+      <label>Cidade</label>
+      <input type="text" id="cidade">
+
+      <label>Estado</label>
+      <input type="text" id="estado" value="MG" readonly>
+
       <label>Descrição do Serviço</label>
       <textarea id="descricao" rows="3"></textarea>
 
       <label>Valor Total (R$)</label>
-      <input type="number" id="valor" step="0.01">
+      <input type="number" id="valor" step="0.01" oninput="atualizarRestante()">
 
       <label>Valor Recebido / Sinal (R$)</label>
-      <input type="number" id="sinal" step="0.01">
+      <input type="number" id="sinal" step="0.01" oninput="atualizarRestante()">
+
+      <label>Restante Valor (R$)</label>
+      <input type="number" id="restanteValor" readonly>
 
       <label>Como entrou</label>
       <select id="forma">
@@ -75,8 +97,13 @@
         <span id="copyMsg" class="copy-msg" style="display:none;">✅ Copiada!</span>
       </div>
 
-      <button onclick="gerarNota()">Gerar Nota e Salvar</button>
-      <button class="limpar" onclick="limparCampos()">🔄 Limpar e iniciar outro</button>
+      <div class="btn-group">
+        <button onclick="gerarNota()">Gerar Nota e Salvar</button>
+        <button onclick="imprimirNota()">🖨️ Imprimir Nota</button>
+        <button onclick="enviarWhatsApp()">📲 Enviar via WhatsApp</button>
+        <button class="limpar" onclick="limparCampos()">🔄 Limpar e iniciar outro</button>
+        <button onclick="preencherRapido()">⚡ Preencher rápido</button>
+      </div>
     </div>
 
     <div id="notaGerada" class="nota" style="display:none;"></div>
@@ -93,6 +120,13 @@
 
 <script>
 let registros = JSON.parse(localStorage.getItem("orcamentos3")) || [];
+
+function atualizarRestante(){
+  const valor = parseFloat(document.getElementById('valor').value) || 0;
+  const sinal = parseFloat(document.getElementById('sinal').value) || 0;
+  const restante = valor - sinal;
+  document.getElementById('restanteValor').value = restante > 0 ? restante.toFixed(2) : "0.00";
+}
 
 function gerarQR(){
   const chave = document.getElementById('chavePix').value;
@@ -117,45 +151,92 @@ function copiarChave(){
 }
 
 function gerarNota(){
-  const nome=document.getElementById('nome').value;
-  const descricao=document.getElementById('descricao').value;
+  const nome=document.getElementById('nome').value.trim();
+  const cpfCliente=document.getElementById('cpfCliente').value.trim();
+  const endereco=document.getElementById('endereco').value.trim();
+  const numero=document.getElementById('numero').value.trim();
+  const bairro=document.getElementById('bairro').value.trim();
+  const cidade=document.getElementById('cidade').value.trim();
+  const estado=document.getElementById('estado').value.trim();
+
+  const descricao=document.getElementById('descricao').value.trim();
   const valor=parseFloat(document.getElementById('valor').value)||0;
   const sinal=parseFloat(document.getElementById('sinal').value)||0;
+  const restante = valor - sinal;
   const forma=document.getElementById('forma').value;
   const dataRestante=document.getElementById('dataRestante').value;
   const inicio=document.getElementById('inicio').value;
   const termino=document.getElementById('termino').value;
   const prestador=document.getElementById('prestador').value;
-  const cpf=document.getElementById('cpf').value;
+  const cpfPrestador=document.getElementById('cpf').value;
   const chavePix=document.getElementById('chavePix').value;
 
-  if(!nome || !valor){alert("Preencha nome e valor total!");return;}
+  if(!nome || !cpfCliente || !endereco || !numero || !bairro || !cidade || !valor){
+    alert("Por favor, preencha todos os dados obrigatórios antes de gerar a nota!");
+    return;
+  }
+
+  const enderecoCompleto = `${endereco}, ${numero} - ${bairro}, ${cidade} - ${estado}`;
 
   const notaHTML=`
     <h2>Nota de Orçamento</h2>
     <p><strong>Cliente:</strong> ${nome}</p>
+    <p><strong>CPF:</strong> ${cpfCliente}</p>
+    <p><strong>Endereço:</strong> ${enderecoCompleto}</p>
     <p><strong>Serviço:</strong> ${descricao}</p>
     <p><strong>Valor Total:</strong> R$ ${valor.toFixed(2)}</p>
     <p><strong>Valor Recebido:</strong> R$ ${sinal.toFixed(2)} (${forma})</p>
-    <p><strong>Restante combinado:</strong> ${dataRestante?new Date(dataRestante).toLocaleDateString('pt-BR'):"-"}</p>
-    <p><strong>Início:</strong> ${inicio} - <strong>Término:</strong> ${termino}</p>
+    <p><strong>Restante a pagar:</strong> R$ ${restante > 0 ? restante.toFixed(2) : "0.00"}</p>
+    <p><strong>Restante combinado para pagamento:</strong> ${dataRestante ? new Date(dataRestante).toLocaleDateString('pt-BR') : "-"}</p>
+    <p><strong>Início:</strong> ${inicio ? new Date(inicio).toLocaleDateString('pt-BR') : "-"} - <strong>Término:</strong> ${termino ? new Date(termino).toLocaleDateString('pt-BR') : "-"}</p>
     <hr>
-    <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpf}</p>
-    ${forma==="PIX"?`<p><strong>Chave PIX:</strong> ${chavePix}</p>`:""}
+    <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpfPrestador}</p>
+    ${forma==="PIX" ? `<p><strong>Chave PIX:</strong> ${chavePix}</p>` : ""}
     <p style="text-align:center;">💼 Gênesis Azulejista - BH e Região</p>
-    <button class="whatsapp" onclick="enviarWhatsApp('${nome}','${descricao}','${valor}','${sinal}','${forma}','${chavePix}')">📲 Enviar via WhatsApp</button>
   `;
   document.getElementById('notaGerada').innerHTML=notaHTML;
   document.getElementById('notaGerada').style.display="block";
 
-  const registro={nome,descricao,valor,sinal,forma,dataRestante,inicio,termino,prestador,cpf,chavePix,data:new Date().toLocaleDateString()};
+  const registro={nome,cpfCliente,enderecoCompleto,descricao,valor,sinal,restante,forma,dataRestante,inicio,termino,prestador,cpfPrestador,chavePix,data:new Date().toLocaleDateString()};
   registros.push(registro);
   localStorage.setItem("orcamentos3",JSON.stringify(registros));
   atualizarControle();
 }
 
-function enviarWhatsApp(nome,descricao,valor,sinal,forma,chavePix){
-  const msg = `📋 *Orçamento - Gênesis Azulejista*\n\n👤 Cliente: ${nome}\n🧱 Serviço: ${descricao}\n💰 Valor Total: R$ ${valor}\n💵 Sinal Recebido: R$ ${sinal} (${forma})\n\n🔑 Chave PIX: ${chavePix}\n\n📅 Obrigado por confiar em nosso trabalho!`;
+function enviarWhatsApp(){
+  const nome=document.getElementById('nome').value.trim();
+  const cpfCliente=document.getElementById('cpfCliente').value.trim();
+  const endereco=document.getElementById('endereco').value.trim();
+  const numero=document.getElementById('numero').value.trim();
+  const bairro=document.getElementById('bairro').value.trim();
+  const cidade=document.getElementById('cidade').value.trim();
+  const estado=document.getElementById('estado').value.trim();
+
+  const descricao=document.getElementById('descricao').value.trim();
+  const valor=parseFloat(document.getElementById('valor').value)||0;
+  const sinal=parseFloat(document.getElementById('sinal').value)||0;
+  const restante = valor - sinal;
+  const forma=document.getElementById('forma').value;
+  const chavePix=document.getElementById('chavePix').value;
+
+  if(!nome || !cpfCliente || !endereco || !numero || !bairro || !cidade || !valor){
+    alert("Por favor, gere a nota corretamente antes de enviar pelo WhatsApp.");
+    return;
+  }
+
+  const enderecoCompleto = `${endereco}, ${numero} - ${bairro}, ${cidade} - ${estado}`;
+
+  const msg = `📋 *Orçamento - Gênesis Azulejista*\n\n` +
+              `👤 Cliente: ${nome}\n` +
+              `🆔 CPF: ${cpfCliente}\n` +
+              `🏠 Endereço: ${enderecoCompleto}\n` +
+              `🧱 Serviço: ${descricao}\n` +
+              `💰 Valor Total: R$ ${valor.toFixed(2)}\n` +
+              `💵 Sinal Recebido: R$ ${sinal.toFixed(2)} (${forma})\n` +
+              `💸 Restante a pagar: R$ ${restante > 0 ? restante.toFixed(2) : "0.00"}\n` +
+              (forma==="PIX" ? `🔑 Chave PIX: ${chavePix}\n` : "") +
+              `\n📅 Obrigado por confiar em nosso trabalho!`;
+
   const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 }
@@ -168,24 +249,67 @@ function atualizarControle(){
     total+=r.valor;
     lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
   });
-  document.getElementById('totalMes').innerText=total.toFixed(2);
+  document.getElementById('totalMes').innerText=total.toFixed(2).replace('.',',');
 }
 
 function limparCampos(){
-  document.querySelectorAll("input:not([id='prestador']):not([id='cpf']):not([id='chavePix']), textarea").forEach(el=>el.value="");
-  document.getElementById("notaGerada").style.display="none";
-  document.getElementById("qrcode").innerHTML="";
+  if(confirm("Tem certeza que quer limpar todos os campos para um novo orçamento?")){
+    document.querySelectorAll('input,textarea,select').forEach(e=>{
+      if(e.id==="estado") return; // mantem MG
+      if(e.id==="prestador") return; // mantem nome prestador
+      if(e.id==="cpf") return; // mantem cpf prestador
+      if(e.id==="chavePix") return; // mantem chave pix
+      e.value="";
+    });
+    document.getElementById('restanteValor').value="";
+    document.getElementById('notaGerada').style.display="none";
+    document.getElementById('qrcode').innerHTML="";
+  }
 }
 
 function limparControle(){
-  if(confirm("Tem certeza que deseja limpar todo o controle do mês?")){
+  if(confirm("Quer apagar todo o controle do mês?")){
     registros=[];
     localStorage.removeItem("orcamentos3");
     atualizarControle();
   }
 }
 
-atualizarControle();
+function imprimirNota(){
+  if(document.getElementById('notaGerada').style.display==="none"){
+    alert("Gere a nota antes de imprimir.");
+    return;
+  }
+  const conteudo = document.getElementById('notaGerada').innerHTML;
+  const win = window.open('','','width=600,height=700');
+  win.document.write(`<html><head><title>Nota de Orçamento</title></head><body>${conteudo}</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
+}
+
+function preencherRapido(){
+  document.getElementById('nome').value = "João Silva";
+  document.getElementById('cpfCliente').value = "123.456.789-00";
+  document.getElementById('endereco').value = "Rua das Flores";
+  document.getElementById('numero').value = "123";
+  document.getElementById('bairro').value = "Centro";
+  document.getElementById('cidade').value = "Betim";
+  document.getElementById('descricao').value = "Revestimento de banheiro";
+  document.getElementById('valor').value = "1500.00";
+  document.getElementById('sinal').value = "500.00";
+  atualizarRestante();
+  document.getElementById('forma').value = "PIX";
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('dataRestante').value = hoje;
+  document.getElementById('inicio').value = hoje;
+  document.getElementById('termino').value = hoje;
+}
+
+window.onload = function(){
+  atualizarControle();
+}
 </script>
 </body>
 </html>
