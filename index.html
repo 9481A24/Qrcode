@@ -46,7 +46,7 @@
     <label>Bairro</label><input type="text" id="bairro">
     <label>Cidade</label><input type="text" id="cidade">
     <label>Data</label><input type="date" id="data">
-    <label>Descrição do Serviço</label><textarea id="descricao" rows="3"></textarea>
+    <label>Descrição do Serviço</label><textarea id="descricao" rows="4" placeholder="Um item por linha"></textarea>
     <label>Valor Total (R$)</label><input type="number" id="valor" step="0.01" oninput="atualizarRestante()">
     <label>Valor Recebido / Sinal (R$)</label><input type="number" id="sinal" step="0.01" oninput="atualizarRestante()">
     <label>Restante (R$)</label><input type="number" id="restanteValor" readonly>
@@ -152,13 +152,17 @@ function gerarNota(){
 
   const enderecoCompleto=`${endereco}, ${numero} - ${bairro}, ${cidade}`;
 
+  // Formatar descrição linha a linha
+  const descricaoFormatada = descricao.split("\n").map(item=>`<p>${item}</p>`).join('');
+
   const notaHTML=`
     <h2>📄 Nota de Orçamento</h2>
     <p><strong>Data:</strong> ${data?new Date(data).toLocaleDateString('pt-BR'):"-"}</p>
     <p><strong>Cliente:</strong> ${nome}</p>
     <p><strong>CPF:</strong> ${cpfCliente}</p>
     <p><strong>Endereço:</strong> ${enderecoCompleto}</p>
-    <p><strong>Serviço:</strong> ${descricao}</p>
+    <p><strong>Serviço:</strong></p>
+    ${descricaoFormatada}
     <p><strong>Valor Total:</strong> R$ ${valor.toFixed(2)}</p>
     <p><strong>Valor Recebido:</strong> R$ ${sinal.toFixed(2)} (${forma})</p>
     <p><strong>Restante:</strong> R$ ${restante>0?restante.toFixed(2):"0.00"}</p>
@@ -172,7 +176,6 @@ function gerarNota(){
   document.getElementById('nota').innerHTML=notaHTML;
   mostrarSecao('nota');
 
-  // Salvar
   const registro={nome,cpfCliente,enderecoCompleto,data,descricao,valor,sinal,restante,forma,prestador,cpfPrestador,chavePix};
   registros.push(registro);
   localStorage.setItem("orcamentos3",JSON.stringify(registros));
@@ -192,9 +195,34 @@ function gerarQRNota(){
 }
 
 function enviarWhatsApp(){
-  const nota=document.getElementById('nota').innerText;
-  if(!nota){alert("Gere a nota primeiro!"); return;}
-  const url=`https://wa.me/5531980181551?text=${encodeURIComponent(nota)}`;
+  const nome=document.getElementById('nome').value.trim();
+  const cpfCliente=document.getElementById('cpfCliente').value.trim();
+  const endereco=document.getElementById('endereco').value.trim();
+  const numero=document.getElementById('numero').value.trim();
+  const bairro=document.getElementById('bairro').value.trim();
+  const cidade=document.getElementById('cidade').value.trim();
+  const data=document.getElementById('data').value;
+  const descricao=document.getElementById('descricao').value.trim();
+  const valor=parseFloat(document.getElementById('valor').value)||0;
+  const sinal=parseFloat(document.getElementById('sinal').value)||0;
+  const restante=valor-sinal;
+  const forma=document.getElementById('forma').value;
+  const chavePix=document.getElementById('chavePix').value;
+
+  if(!nome||!cpfCliente){alert("Gere a nota antes de enviar!"); return;}
+
+  const enderecoCompleto=`${endereco}, ${numero} - ${bairro}, ${cidade}`;
+  const msg = `📋 *Orçamento - Gênesis Azulejista*\n\n`+
+              `👤 Cliente: ${nome}\n`+
+              `🆔 CPF: ${cpfCliente}\n`+
+              `🏠 Endereço: ${enderecoCompleto}\n`+
+              `🧱 Serviço: ${descricao}\n`+
+              `💰 Valor Total: R$ ${valor.toFixed(2)}\n`+
+              `💵 Sinal: R$ ${sinal.toFixed(2)} (${forma})\n`+
+              `💸 Restante: R$ ${restante.toFixed(2)}\n`+
+              (forma==="PIX"?`🔑 Chave PIX: ${chavePix}\n`:"")+
+              `\n📅 Obrigado por confiar em nosso trabalho!`;
+  const url=`https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url,'_blank');
 }
 
@@ -202,17 +230,17 @@ function atualizarHistorico(){
   const lista=document.getElementById('listaHistorico');
   lista.innerHTML="";
   let total=0;
-  registros.forEach((r,i)=>{
+  registros.forEach(r=>{
     total+=r.valor;
-    lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)}</p>`;
+    lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
   });
   document.getElementById('totalMes').innerText=total.toFixed(2).replace('.',',');
 }
 
 function limparCampos(){
-  if(confirm("Tem certeza que deseja limpar os campos?")){
+  if(confirm("Limpar campos?")){
     document.querySelectorAll('input,textarea,select').forEach(e=>{
-      if(["prestador","cpf","chavePix"].includes(e.id)) return;
+      if(["estado","prestador","cpf","chavePix"].includes(e.id)) return;
       e.value="";
     });
     document.getElementById('restanteValor').value="";
@@ -221,7 +249,7 @@ function limparCampos(){
 }
 
 function limparHistorico(){
-  if(confirm("Deseja apagar todo o histórico?")){
+  if(confirm("Apagar todo o histórico?")){
     registros=[];
     localStorage.removeItem("orcamentos3");
     atualizarHistorico();
@@ -246,17 +274,16 @@ function preencherRapido(){
   document.getElementById('bairro').value="Centro";
   document.getElementById('cidade').value="Betim";
   document.getElementById('data').value=new Date().toISOString().split('T')[0];
-  document.getElementById('descricao').value="Revestimento de banheiro";
+  document.getElementById('descricao').value="Revestimento de banheiro\nInstalação de porcelanato\nLimpeza final";
   document.getElementById('valor').value="1500.00";
   document.getElementById('sinal').value="500.00";
   atualizarRestante();
   document.getElementById('forma').value="PIX";
 }
 
-window.onload=()=>{
+window.onload=function(){
   atualizarHistorico();
 }
 </script>
 </body>
 </html>
-
