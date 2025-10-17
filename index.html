@@ -30,7 +30,7 @@
 <body>
 <div class="container">
 
-  <h1>📋 Prestação Servico - Marco Azulejista</h1>
+  <h1>📋 Prestação Serviço - Marco Azulejista</h1>
 
   <div class="menu">
     <button onclick="mostrarSecao('preencher')">📝 Preencher</button>
@@ -59,10 +59,10 @@
     </select>
 
     <!-- Prestador -->
-    <label>Nome do Prestador</label><input type="text" id="prestador" value="Gênesis Azulejista">
-    <label>CPF do Prestador</label><input type="text" id="cpf" value="123.456.789-00">
-    <label>Endereço do Prestador</label><input type="text" id="enderecoPrestador" value="Rua Exemplo, 100 - Bairro, Cidade">
-    <label>Chave PIX</label><input type="text" id="chavePix" value="04461680681">
+    <label>Nome do Prestador</label><input type="text" id="prestador">
+    <label>CPF do Prestador</label><input type="text" id="cpf">
+    <label>Endereço do Prestador</label><input type="text" id="enderecoPrestador">
+    <label>Chave PIX</label><input type="text" id="chavePix">
 
     <div class="qr-area">
       <div id="qrcode"></div>
@@ -89,9 +89,7 @@
     <div class="total-box">
       💰 Total do Mês: R$ <span id="totalMes">0,00</span>
     </div>
-    <!-- Círculos da divisão -->
     <div id="divisao-circulos" style="display:flex; gap:15px; margin-top:15px;"></div>
-
     <button class="limpar" onclick="limparHistorico()">🗑️ Limpar Histórico</button>
   </div>
 
@@ -268,21 +266,15 @@ function atualizarHistorico(){
     lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
   });
   document.getElementById('totalMes').innerText=total.toFixed(2).replace('.',',');
-  
-  // Atualiza os círculos da divisão
   atualizarDivisaoCirculos();
 }
 
-// --- NOVA FUNÇÃO: Círculos 10%,30%,30%,30% ---
 function atualizarDivisaoCirculos() {
   const container = document.getElementById('divisao-circulos');
   container.innerHTML = '';
-
   const total = registros.reduce((sum, r) => sum + r.valor, 0);
   if(total <= 0) return;
-
   const percentuais = [10, 30, 30, 30];
-
   percentuais.forEach(p => {
     const valor = (total * p / 100).toFixed(2);
     const circulo = document.createElement('div');
@@ -311,6 +303,7 @@ function limparCampos(){
     });
     document.getElementById('restanteValor').value="";
     document.getElementById('qrcode').innerHTML="";
+    preencherPrestadorDefaults();
   }
 }
 
@@ -330,14 +323,24 @@ function preencherRapido(){
   document.getElementById('bairro').value="Centro";
   document.getElementById('cidade').value="Belo Horizonte";
   document.getElementById('data').value=new Date().toISOString().split('T')[0];
-  document.getElementById('descricao').value="Assentamento de porcelanato\nRejunte e acabamento";
-  document.getElementById('valor').value="1000";
-  document.getElementById('sinal').value="300";
+  document.getElementById('descricao').value="Assentamento de porcelanato\nRejuntamento";
+  document.getElementById('valor').value="1500";
+  document.getElementById('sinal').value="500";
   atualizarRestante();
+  preencherPrestadorDefaults();
 }
 
-atualizarHistorico();
+function preencherPrestadorDefaults(){
+  document.getElementById('prestador').value="Marco Lúcio Silva Fernandes";
+  document.getElementById('cpf').value="044.616.806-81";
+  document.getElementById('enderecoPrestador').value="Rua Lavras, 38 - Resplendor, Igarapé - MG";
+  document.getElementById('chavePix').value="04461680681";
+}
+
+window.onload = () => {
+  preencherPrestadorDefaults();
+  atualizarHistorico();
+};
 </script>
 </body>
 </html>
-
