@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -58,10 +57,13 @@
       <option value="Dinheiro">Dinheiro</option>
       <option value="Cartão de Crédito">Cartão de Crédito</option>
     </select>
+
+    <!-- Prestador -->
     <label>Nome do Prestador</label><input type="text" id="prestador" value="Gênesis Azulejista">
     <label>CPF do Prestador</label><input type="text" id="cpf" value="123.456.789-00">
+    <label>Endereço do Prestador</label><input type="text" id="enderecoPrestador" value="Rua Exemplo, 100 - Bairro, Cidade">
     <label>Chave PIX</label><input type="text" id="chavePix" value="04461680681">
-    
+
     <div class="qr-area">
       <div id="qrcode"></div>
       <button onclick="gerarQR()">Gerar QR PIX</button>
@@ -143,8 +145,10 @@ function gerarNota(){
   const sinal=parseFloat(document.getElementById('sinal').value)||0;
   const restante=valor-sinal;
   const forma=document.getElementById('forma').value;
+
   const prestador=document.getElementById('prestador').value;
   const cpfPrestador=document.getElementById('cpf').value;
+  const enderecoPrestador=document.getElementById('enderecoPrestador').value;
   const chavePix=document.getElementById('chavePix').value;
 
   if(!nome||!cpfCliente||!endereco||!numero||!bairro||!cidade||!valor){
@@ -167,6 +171,7 @@ function gerarNota(){
     <p><strong>Valor Recebido:</strong> R$ ${sinal.toFixed(2)} (${forma})</p>
     <p><strong>Restante:</strong> R$ ${restante>0?restante.toFixed(2):"0.00"}</p>
     <p><strong>Prestador:</strong> ${prestador} - CPF: ${cpfPrestador}</p>
+    <p><strong>Endereço do Prestador:</strong> ${enderecoPrestador}</p>
     ${forma==="PIX"?`<p><strong>Chave PIX:</strong> ${chavePix}</p>`:""}
     <div id="qrcodeNota"></div>
     <button onclick="gerarQRNota()">Gerar QR PIX</button>
@@ -176,7 +181,7 @@ function gerarNota(){
   document.getElementById('nota').innerHTML=notaHTML;
   mostrarSecao('nota');
 
-  const registro={nome,cpfCliente,enderecoCompleto,data,descricao,valor,sinal,restante,forma,prestador,cpfPrestador,chavePix};
+  const registro={nome,cpfCliente,enderecoCompleto,data,descricao,valor,sinal,restante,forma,prestador,cpfPrestador,enderecoPrestador,chavePix};
   registros.push(registro);
   localStorage.setItem("orcamentos3",JSON.stringify(registros));
   atualizarHistorico();
@@ -202,7 +207,6 @@ async function imprimirNota(){
   win.focus();
   win.print();
 
-  // Baixar PDF automático
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   await doc.html(conteudo, {
@@ -228,6 +232,9 @@ function enviarWhatsApp(){
   const sinal=parseFloat(document.getElementById('sinal').value)||0;
   const restante=valor-sinal;
   const forma=document.getElementById('forma').value;
+  const prestador=document.getElementById('prestador').value;
+  const cpfPrestador=document.getElementById('cpf').value;
+  const enderecoPrestador=document.getElementById('enderecoPrestador').value;
   const chavePix=document.getElementById('chavePix').value;
 
   if(!nome||!cpfCliente){alert("Gere a nota antes de enviar!"); return;}
@@ -241,6 +248,8 @@ function enviarWhatsApp(){
               `💰 Valor Total: R$ ${valor.toFixed(2)}\n`+
               `💵 Sinal: R$ ${sinal.toFixed(2)} (${forma})\n`+
               `💸 Restante: R$ ${restante.toFixed(2)}\n`+
+              `👷 Prestador: ${prestador} - CPF: ${cpfPrestador}\n`+
+              `🏠 Endereço Prestador: ${enderecoPrestador}\n`+
               (forma==="PIX"?`🔑 Chave PIX: ${chavePix}\n`:"")+
               `\n📅 Obrigado por confiar em nosso trabalho!`;
   const url=`https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -261,7 +270,7 @@ function atualizarHistorico(){
 function limparCampos(){
   if(confirm("Limpar campos?")){
     document.querySelectorAll('input,textarea,select').forEach(e=>{
-      if(["estado","prestador","cpf","chavePix"].includes(e.id)) return;
+      if(["estado","prestador","cpf","chavePix","enderecoPrestador"].includes(e.id)) return;
       e.value="";
     });
     document.getElementById('restanteValor').value="";
@@ -295,6 +304,36 @@ function preencherRapido(){
 window.onload=function(){
   atualizarHistorico();
 }
+
+// --- Salvar prestador automaticamente ---
+(function(){
+  const key = 'prestadorDados';
+  const elNome = document.getElementById('prestador');
+  const elCPF = document.getElementById('cpf');
+  const elEndereco = document.getElementById('enderecoPrestador');
+
+  function salvarPrestador() {
+    const data = {
+      nome: elNome.value,
+      cpf: elCPF.value,
+      endereco: elEndereco.value
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  function carregarPrestador() {
+    const data = JSON.parse(localStorage.getItem(key)||'{}');
+    if(data.nome) elNome.value = data.nome;
+    if(data.cpf) elCPF.value = data.cpf;
+    if(data.endereco) elEndereco.value = data.endereco;
+  }
+
+  [elNome, elCPF, elEndereco].forEach(el=>{
+    el.addEventListener('input', salvarPrestador);
+  });
+
+  carregarPrestador();
+})();
 </script>
 </body>
 </html>
