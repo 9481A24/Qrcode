@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Orçamento Profissional - Gênesis Azulejista</title>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;padding:0;}
   .container{max-width:800px;margin:auto;padding:20px;}
@@ -151,8 +153,6 @@ function gerarNota(){
   }
 
   const enderecoCompleto=`${endereco}, ${numero} - ${bairro}, ${cidade}`;
-
-  // Formatar descrição linha a linha
   const descricaoFormatada = descricao.split("\n").map(item=>`<p>${item}</p>`).join('');
 
   const notaHTML=`
@@ -191,6 +191,27 @@ function gerarQRNota(){
   QRCode.toCanvas(texto,{width:150},function(err,canvas){
     if(err){alert("Erro ao gerar QR."); return;}
     document.getElementById('qrcodeNota').appendChild(canvas);
+  });
+}
+
+async function imprimirNota(){
+  const conteudo=document.getElementById('nota').innerHTML;
+  const win=window.open('','','width=600,height=700');
+  win.document.write(`<html><head><title>Nota</title></head><body>${conteudo}</body></html>`);
+  win.document.close();
+  win.focus();
+  win.print();
+
+  // Baixar PDF automático
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  await doc.html(conteudo, {
+    callback: function (pdf) {
+      pdf.save('nota_orcamento.pdf');
+    },
+    x: 10,
+    y: 10,
+    width: 180
   });
 }
 
@@ -254,16 +275,6 @@ function limparHistorico(){
     localStorage.removeItem("orcamentos3");
     atualizarHistorico();
   }
-}
-
-function imprimirNota(){
-  const conteudo=document.getElementById('nota').innerHTML;
-  const win=window.open('','','width=600,height=700');
-  win.document.write(`<html><head><title>Nota</title></head><body>${conteudo}</body></html>`);
-  win.document.close();
-  win.focus();
-  win.print();
-  win.close();
 }
 
 function preencherRapido(){
