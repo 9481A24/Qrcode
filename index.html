@@ -89,6 +89,9 @@
     <div class="total-box">
       💰 Total do Mês: R$ <span id="totalMes">0,00</span>
     </div>
+    <!-- Círculos da divisão -->
+    <div id="divisao-circulos" style="display:flex; gap:15px; margin-top:15px;"></div>
+
     <button class="limpar" onclick="limparHistorico()">🗑️ Limpar Histórico</button>
   </div>
 
@@ -265,6 +268,39 @@ function atualizarHistorico(){
     lista.innerHTML+=`<p>🧱 ${r.nome} - ${r.forma} - R$ ${r.valor.toFixed(2)} (${r.data})</p>`;
   });
   document.getElementById('totalMes').innerText=total.toFixed(2).replace('.',',');
+  
+  // Atualiza os círculos da divisão
+  atualizarDivisaoCirculos();
+}
+
+// --- NOVA FUNÇÃO: Círculos 10%,30%,30%,30% ---
+function atualizarDivisaoCirculos() {
+  const container = document.getElementById('divisao-circulos');
+  container.innerHTML = '';
+
+  const total = registros.reduce((sum, r) => sum + r.valor, 0);
+  if(total <= 0) return;
+
+  const percentuais = [10, 30, 30, 30];
+
+  percentuais.forEach(p => {
+    const valor = (total * p / 100).toFixed(2);
+    const circulo = document.createElement('div');
+    circulo.style.width = '70px';
+    circulo.style.height = '70px';
+    circulo.style.borderRadius = '50%';
+    circulo.style.background = '#FFD700';
+    circulo.style.display = 'flex';
+    circulo.style.flexDirection = 'column';
+    circulo.style.alignItems = 'center';
+    circulo.style.justifyContent = 'center';
+    circulo.style.fontWeight = 'bold';
+    circulo.style.textAlign = 'center';
+    circulo.style.fontSize = '13px';
+    circulo.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    circulo.innerHTML = `<div>${p}%</div><div>R$${valor}</div>`;
+    container.appendChild(circulo);
+  });
 }
 
 function limparCampos(){
@@ -292,48 +328,16 @@ function preencherRapido(){
   document.getElementById('endereco').value="Rua das Flores";
   document.getElementById('numero').value="123";
   document.getElementById('bairro').value="Centro";
-  document.getElementById('cidade').value="Betim";
+  document.getElementById('cidade').value="Belo Horizonte";
   document.getElementById('data').value=new Date().toISOString().split('T')[0];
-  document.getElementById('descricao').value="Revestimento de banheiro\nInstalação de porcelanato\nLimpeza final";
-  document.getElementById('valor').value="1500.00";
-  document.getElementById('sinal').value="500.00";
+  document.getElementById('descricao').value="Assentamento de porcelanato\nRejunte e acabamento";
+  document.getElementById('valor').value="1000";
+  document.getElementById('sinal').value="300";
   atualizarRestante();
-  document.getElementById('forma').value="PIX";
 }
 
-window.onload=function(){
-  atualizarHistorico();
-}
-
-// --- Salvar prestador automaticamente ---
-(function(){
-  const key = 'prestadorDados';
-  const elNome = document.getElementById('prestador');
-  const elCPF = document.getElementById('cpf');
-  const elEndereco = document.getElementById('enderecoPrestador');
-
-  function salvarPrestador() {
-    const data = {
-      nome: elNome.value,
-      cpf: elCPF.value,
-      endereco: elEndereco.value
-    };
-    localStorage.setItem(key, JSON.stringify(data));
-  }
-
-  function carregarPrestador() {
-    const data = JSON.parse(localStorage.getItem(key)||'{}');
-    if(data.nome) elNome.value = data.nome;
-    if(data.cpf) elCPF.value = data.cpf;
-    if(data.endereco) elEndereco.value = data.endereco;
-  }
-
-  [elNome, elCPF, elEndereco].forEach(el=>{
-    el.addEventListener('input', salvarPrestador);
-  });
-
-  carregarPrestador();
-})();
+atualizarHistorico();
 </script>
 </body>
 </html>
+
